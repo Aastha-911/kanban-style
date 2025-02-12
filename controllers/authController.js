@@ -48,3 +48,17 @@ exports.login = async (req, res) => {
       .json({ success: false, message: "Error logging in", error });
   }
 };
+
+exports.authenticated = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    if (!userId) {
+      return res
+        .status(200)
+        .json({ success: false, message: "User not found " });
+    }
+    return res.status(200).json({ success: true, message: "User verified " });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

@@ -1,23 +1,30 @@
+const User = require("../models/user");
 const Task = require("../models/task");
 
 exports.createTask = async (req, res) => {
   try {
     const { title, description, status, position } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
     const newTask = new Task({
       title,
       description,
       status,
       position,
       userId: req.user.id,
+      userName: user.name,
     });
     await newTask.save();
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Tak added successfully",
-        data: newTask,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Task added successfully",
+      data: newTask,
+    });
   } catch (error) {
     res
       .status(500)
@@ -34,7 +41,7 @@ exports.getTasks = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: true, message: "Error fetching tasks", error });
+      .json({ success: false, message: "Error fetching tasks", error });
   }
 };
 
@@ -43,7 +50,11 @@ exports.updateTask = async (req, res) => {
     const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-    res.json({ success: true, data: updatedTask });
+    res.json({
+      success: true,
+      message: "Task updated successfully",
+      data: updatedTask,
+    });
   } catch (error) {
     res
       .status(500)
@@ -58,6 +69,6 @@ exports.deleteTask = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: true, message: "Error deleting task", error });
+      .json({ success: false, message: "Error deleting task", error });
   }
 };
