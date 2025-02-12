@@ -3,7 +3,8 @@ const Task = require("../models/task");
 
 exports.createTask = async (req, res) => {
   try {
-    const { title, description, status, position } = req.body;
+    const { title, description, status, position, dueDate, priority } =
+      req.body;
     const user = await User.findById(req.user.id);
     if (!user) {
       return res
@@ -18,6 +19,8 @@ exports.createTask = async (req, res) => {
       position,
       userId: req.user.id,
       userName: user.name,
+      dueDate: dueDate ? new Date(dueDate) : null,
+      priority: priority || "Medium",
     });
     await newTask.save();
     res.status(201).json({
