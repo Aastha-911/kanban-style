@@ -5,6 +5,12 @@ exports.createTask = async (req, res) => {
   try {
     const { title, description, status, position, dueDate, priority } =
       req.body;
+
+    if (!title || !description) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Title and description is required" });
+    }
     const user = await User.findById(req.user.id);
     if (!user) {
       return res
@@ -68,15 +74,24 @@ exports.getTasks = async (req, res) => {
 
 exports.updateTask = async (req, res) => {
   try {
-    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const task = await Task.findById(req.params.id);
 
-    if (!updatedTask) {
+    if (!task) {
       return res
         .status(404)
         .json({ success: false, message: "Task not found" });
     }
+
+    if (task.userId.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized: You can only update your own tasks",
+      });
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
 
     const io = req.app.get("socketio");
     io.emit("taskUpdated", updatedTask);
@@ -96,13 +111,22 @@ exports.updateTask = async (req, res) => {
 
 exports.deleteTask = async (req, res) => {
   try {
-    const deletedTask = await Task.findByIdAndDelete(req.params.id);
+    const task = await Task.findById(req.params.id);
 
-    if (!deletedTask) {
+    if (!task) {
       return res
         .status(404)
         .json({ success: false, message: "Task not found" });
     }
+
+    if (task.userId.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized: You can only delete your own tasks",
+      });
+    }
+
+    await Task.findByIdAndDelete(req.params.id);
 
     const io = req.app.get("socketio");
     io.emit("taskDeleted", { taskId: req.params.id });
