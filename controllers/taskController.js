@@ -23,6 +23,10 @@ exports.createTask = async (req, res) => {
       priority: priority || "Medium",
     });
     await newTask.save();
+
+    const io = req.app.get("socketio");
+    io.emit("taskCreated", newTask);
+
     res.status(201).json({
       success: true,
       message: "Task added successfully",
@@ -53,6 +57,16 @@ exports.updateTask = async (req, res) => {
     const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+
+    if (!updatedTask) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
+    }
+
+    const io = req.app.get("socketio");
+    io.emit("taskUpdated", updatedTask);
+
     res.json({
       success: true,
       message: "Task updated successfully",
@@ -67,7 +81,16 @@ exports.updateTask = async (req, res) => {
 
 exports.deleteTask = async (req, res) => {
   try {
-    await Task.findByIdAndDelete(req.params.id);
+    const deletedTask = await Task.findByIdAndDelete(req.params.id);
+
+    if (!deletedTask) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
+    }
+
+    const io = req.app.get("socketio");
+    io.emit("taskDeleted", { taskId: req.params.id });
     res.json({ success: true, message: "Task deleted successfully" });
   } catch (error) {
     res
