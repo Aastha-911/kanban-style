@@ -11,7 +11,13 @@ exports.createTask = async (req, res) => {
       userId: req.user.id,
     });
     await newTask.save();
-    res.status(201).json({ success: true, data: newTask });
+    res
+      .status(201)
+      .json({
+        success: true,
+        message: "Tak added successfully",
+        data: newTask,
+      });
   } catch (error) {
     res
       .status(500)
