@@ -10,13 +10,12 @@ require("dotenv").config();
 
 const app = express();
 
-const server = http.createServer(app); // Create an HTTP server
+const server = http.createServer(app);
 
-// Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL, // Adjust this to match your frontend URL
-    methods: ["GET", "POST"],
+    origin: process.env.CLIENT_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
 

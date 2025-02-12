@@ -12,6 +12,7 @@ exports.register = async (req, res) => {
       .status(201)
       .json({ success: true, message: "User registered successfully" });
   } catch (error) {
+    console.error(error);
     res
       .status(500)
       .json({ success: false, message: "Error registering user", error });
@@ -36,13 +37,14 @@ exports.login = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "14d",
     });
-    res.json({
+    res.status(201).json({
       success: true,
       message: "User logged in successfully",
       name: user.name,
       token: token,
     });
   } catch (error) {
+    console.error(error);
     res
       .status(500)
       .json({ success: false, message: "Error logging in", error });
@@ -59,6 +61,7 @@ exports.authenticated = async (req, res) => {
     }
     return res.status(200).json({ success: true, message: "User verified " });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

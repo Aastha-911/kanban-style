@@ -33,9 +33,22 @@ exports.createTask = async (req, res) => {
       data: newTask,
     });
   } catch (error) {
+    console.error(error);
     res
       .status(500)
       .json({ success: false, message: "Error creating task", error });
+  }
+};
+
+exports.getAllTasks = async (req, res) => {
+  try {
+    const tasks = await Task.find().sort({ position: 1 });
+    res.status(200).json({ success: true, data: tasks });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error", error });
   }
 };
 
@@ -44,8 +57,9 @@ exports.getTasks = async (req, res) => {
     const tasks = await Task.find({ userId: req.user.id }).sort({
       position: 1,
     });
-    res.json({ success: true, data: tasks });
+    res.status(200).json({ success: true, data: tasks });
   } catch (error) {
+    console.error(error);
     res
       .status(500)
       .json({ success: false, message: "Error fetching tasks", error });
@@ -67,12 +81,13 @@ exports.updateTask = async (req, res) => {
     const io = req.app.get("socketio");
     io.emit("taskUpdated", updatedTask);
 
-    res.json({
+    res.status(200).json({
       success: true,
       message: "Task updated successfully",
       data: updatedTask,
     });
   } catch (error) {
+    console.error(error);
     res
       .status(500)
       .json({ success: false, message: "Error updating task", error });
@@ -91,8 +106,11 @@ exports.deleteTask = async (req, res) => {
 
     const io = req.app.get("socketio");
     io.emit("taskDeleted", { taskId: req.params.id });
-    res.json({ success: true, message: "Task deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Task deleted successfully" });
   } catch (error) {
+    console.error(error);
     res
       .status(500)
       .json({ success: false, message: "Error deleting task", error });
