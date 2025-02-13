@@ -11,9 +11,9 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+router.get("/all", authMiddleware, getAllTasks);
 router.get("/:id", authMiddleware, getTaskById);
 router.post("/", authMiddleware, createTask);
-router.get("/all", authMiddleware, getAllTasks);
 router.get("/", authMiddleware, getTasks);
 router.put("/:id", authMiddleware, updateTask);
 router.delete("/:id", authMiddleware, deleteTask);
